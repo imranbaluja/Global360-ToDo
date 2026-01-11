@@ -15,9 +15,24 @@
   <!-- Todo List -->
   <ul class="todo-list">
     <li *ngFor="let item of todos; let i = index" class="todo-item">
-      <span>{{ item.text }}</span>
-
-      <button class="delete-btn" (click)="deleteTodo(i)">Delete</button>
+      <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+        <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+          <ng-container *ngIf="editIndex === i; else viewMode">
+            <input type="text" [(ngModel)]="editText" (keyup.enter)="saveEdit()" />
+            <button (click)="saveEdit()" [disabled]="!editText.trim()">Save</button>
+            <button (click)="cancelEdit()">Cancel</button>
+          </ng-container>
+          <ng-template #viewMode>
+            <span>{{ item.text }}</span>
+          </ng-template>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <ng-container *ngIf="editIndex !== i">
+            <button class="edit-btn" (click)="startEdit(i)">Edit</button>
+            <button class="delete-btn" (click)="deleteTodo(i)">Delete</button>
+          </ng-container>
+        </div>
+      </div>
     </li>
   </ul>
 </div>

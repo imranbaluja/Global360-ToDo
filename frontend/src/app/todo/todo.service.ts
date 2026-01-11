@@ -6,6 +6,9 @@ import { TodoItem } from './todo-item.model';
 
 @Injectable({ providedIn: 'root' })
 export class TodoService {
+  update(id: number, text: string) {
+    return this.http.put<TodoItem>(this.base, { id, text });
+  }
   private base = `${environment.apiUrl}/todos`;
 
   constructor(private http: HttpClient) {}

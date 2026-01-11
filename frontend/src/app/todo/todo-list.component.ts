@@ -12,6 +12,42 @@ import { TodoItem } from './todo-item.model';
   styleUrls: ['./todo-list.component.css'],
 })
 export class TodoListComponent implements OnInit {
+  editIndex: number | null = null;
+  editText: string = '';
+  startEdit(index: number) {
+    this.editIndex = index;
+    this.editText = this.todos[index].text;
+    this.errorMessage = '';
+  }
+
+  cancelEdit() {
+    this.editIndex = null;
+    this.editText = '';
+  }
+
+  saveEdit() {
+    if (this.editIndex === null) return;
+    const todo = this.todos[this.editIndex];
+    const newText = this.editText.trim();
+    if (!newText || newText === todo.text) {
+      this.cancelEdit();
+      return;
+    }
+    this.todoService.update(todo.id, newText).subscribe({
+      next: (updated) => {
+        this.todos[this.editIndex!] = updated;
+        this.cancelEdit();
+      },
+      error: (err) => {
+        console.error('Update todo error:', err);
+        if (err.error && typeof err.error === 'object' && 'message' in err.error) {
+          this.errorMessage = err.error.message;
+        } else {
+          this.errorMessage = 'Failed to update todo.';
+        }
+      },
+    });
+  }
   todos: TodoItem[] = [];
   newTodo: string = '';
   errorMessage: string = '';
@@ -69,7 +105,10 @@ export class TodoListComponent implements OnInit {
     const todo = this.todos[index];
     if (!todo || todo.id == null) return;
     this.todoService.delete(todo.id).subscribe({
-      next: () => this.todos.splice(index, 1),
+      next: () => {
+        this.todos.splice(index, 1);
+        if (this.editIndex === index) this.cancelEdit();
+      },
       error: (err) => console.error('Failed to delete todo', err),
     });
   }

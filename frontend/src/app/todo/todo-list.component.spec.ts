@@ -7,6 +7,14 @@ import { CommonModule } from '@angular/common';
 import { TodoItem } from './todo-item.model';
 
 class MockTodoService {
+  update(id: number, text: string) {
+    const todo = this.todos.find((t) => t.id === id);
+    if (todo) {
+      todo.text = text;
+      return of({ id, text });
+    }
+    return of(undefined);
+  }
   todos: TodoItem[] = [
     { id: 1, text: 'Test Todo 1' },
     { id: 2, text: 'Test Todo 2' },
@@ -23,6 +31,51 @@ class MockTodoService {
 }
 
 describe('TodoListComponent', () => {
+  let component: TodoListComponent;
+  let fixture: ComponentFixture<TodoListComponent>;
+  let todoService: MockTodoService;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TodoListComponent, FormsModule, CommonModule],
+      providers: [{ provide: TodoService, useClass: MockTodoService }],
+    }).compileComponents();
+    fixture = TestBed.createComponent(TodoListComponent);
+    component = fixture.componentInstance;
+    todoService = TestBed.inject(TodoService) as any;
+    fixture.detectChanges();
+  });
+
+  it('should show edit input and buttons when Edit is clicked', () => {
+    expect(component.editIndex).toBeNull();
+    component.todos = [
+      { id: 1, text: 'Test Todo 1' },
+      { id: 2, text: 'Test Todo 2' },
+    ];
+    fixture.detectChanges(); // Initial render with todos
+    component.startEdit(0); // Enter edit mode
+    fixture.detectChanges(); // Update DOM for edit mode
+    expect(component.editIndex).toBe(0);
+    expect(component.editText).toBe('Test Todo 1');
+  });
+
+  it('should call update and exit edit mode on saveEdit', () => {
+    component.todos = [...todoService.todos];
+    component.startEdit(0);
+    component.editText = 'Updated';
+    component.saveEdit();
+    fixture.detectChanges();
+    expect(component.editIndex).toBeNull();
+    expect(component.todos[0].text).toBe('Updated');
+  });
+
+  it('should exit edit mode on cancelEdit', () => {
+    component.startEdit(0);
+    component.cancelEdit();
+    expect(component.editIndex).toBeNull();
+    expect(component.editText).toBe('');
+  });
+
   it('should disable Add button when input is empty or whitespace', () => {
     component.newTodo = '';
     fixture.detectChanges();
@@ -38,20 +91,6 @@ describe('TodoListComponent', () => {
     fixture.detectChanges();
     button = fixture.nativeElement.querySelector('button');
     expect(button.disabled).toBeFalse();
-  });
-  let component: TodoListComponent;
-  let fixture: ComponentFixture<TodoListComponent>;
-  let todoService: MockTodoService;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [TodoListComponent, FormsModule, CommonModule],
-      providers: [{ provide: TodoService, useClass: MockTodoService }],
-    }).compileComponents();
-    fixture = TestBed.createComponent(TodoListComponent);
-    component = fixture.componentInstance;
-    todoService = TestBed.inject(TodoService) as any;
-    fixture.detectChanges();
   });
 
   it('should create', () => {

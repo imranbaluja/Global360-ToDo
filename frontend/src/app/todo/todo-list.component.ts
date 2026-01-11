@@ -12,6 +12,25 @@ import { TodoItem } from './todo-item.model';
   styleUrls: ['./todo-list.component.css'],
 })
 export class TodoListComponent implements OnInit {
+  private handleError(err: any, defaultMsg: string) {
+    console.error(defaultMsg, err);
+    const status = err.status || (err.error && err.error.status);
+    if (err.error && typeof err.error === 'object') {
+      if ('message' in err.error) {
+        this.errorMessage = err.error.message;
+      } else if (err.error.errors && err.error.errors.Text && err.error.errors.Text.length > 0) {
+        this.errorMessage = err.error.errors.Text[0];
+      } else {
+        this.errorMessage = defaultMsg;
+      }
+    } else if (typeof err.error === 'string') {
+      this.errorMessage = err.error;
+    } else if (status === 409) {
+      this.errorMessage = 'Duplicate todo not allowed.';
+    } else {
+      this.errorMessage = defaultMsg;
+    }
+  }
   editIndex: number | null = null;
   editText: string = '';
   startEdit(index: number) {
@@ -38,14 +57,7 @@ export class TodoListComponent implements OnInit {
         this.todos[this.editIndex!] = updated;
         this.cancelEdit();
       },
-      error: (err) => {
-        console.error('Update todo error:', err);
-        if (err.error && typeof err.error === 'object' && 'message' in err.error) {
-          this.errorMessage = err.error.message;
-        } else {
-          this.errorMessage = 'Failed to update todo.';
-        }
-      },
+      error: (err) => this.handleError(err, 'Failed to update todo.'),
     });
   }
   todos: TodoItem[] = [];
@@ -74,30 +86,7 @@ export class TodoListComponent implements OnInit {
         this.todos.push(todo);
         this.newTodo = '';
       },
-      error: (err) => {
-        console.error('Add todo error:', err);
-        const status = err.status || (err.error && err.error.status);
-        // Always try to extract message from err.error.message if present
-        if (err.error && typeof err.error === 'object') {
-          if ('message' in err.error) {
-            this.errorMessage = err.error.message;
-          } else if (
-            err.error.errors &&
-            err.error.errors.Text &&
-            err.error.errors.Text.length > 0
-          ) {
-            this.errorMessage = err.error.errors.Text[0];
-          } else {
-            this.errorMessage = 'Failed to add todo.';
-          }
-        } else if (typeof err.error === 'string') {
-          this.errorMessage = err.error;
-        } else if (status === 409) {
-          this.errorMessage = 'Duplicate todo not allowed.';
-        } else {
-          this.errorMessage = 'Failed to add todo.';
-        }
-      },
+      error: (err) => this.handleError(err, 'Failed to add todo.'),
     });
   }
 

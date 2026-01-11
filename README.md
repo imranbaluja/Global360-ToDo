@@ -179,11 +179,65 @@ This is a simple TODO list application featuring an Angular frontend and an ASP.
 
 Base URL: `http://localhost:5186/api/todos`
 
-| Method | Endpoint          | Description         |
-| ------ | ----------------- | ------------------- |
-| GET    | `/api/todos`      | Get all TODO items  |
-| POST   | `/api/todos`      | Add a new TODO item |
-| DELETE | `/api/todos/{id}` | Delete a TODO item  |
+| Method | Endpoint          | Description             |
+| ------ | ----------------- | ----------------------- |
+| GET    | `/api/todos`      | Get all TODO items      |
+| POST   | `/api/todos`      | Add a new TODO item     |
+| PUT    | `/api/todos`      | Update an existing TODO |
+| DELETE | `/api/todos/{id}` | Delete a TODO item      |
+
+### Endpoint Details
+
+#### GET `/api/todos`
+
+Retrieves all TODO items.
+
+**Response:**
+
+```json
+[
+  { "id": 1, "text": "First todo" },
+  { "id": 2, "text": "Second todo" }
+]
+```
+
+#### POST `/api/todos`
+
+Creates a new TODO item.
+
+**Request Body:**
+
+```json
+{ "text": "New todo" }
+```
+
+**Response:**
+
+```json
+{ "id": 3, "text": "New todo" }
+```
+
+#### PUT `/api/todos`
+
+Updates an existing TODO item.
+
+**Request Body:**
+
+```json
+{ "id": 1, "text": "Updated todo" }
+```
+
+**Response:**
+
+```json
+{ "id": 1, "text": "Updated todo" }
+```
+
+#### DELETE `/api/todos/{id}`
+
+Deletes a TODO item by ID.
+
+**Response:** `204 No Content` on success, `404 Not Found` if item doesn't exist.
 
 ---
 

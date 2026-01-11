@@ -13,6 +13,7 @@ namespace TodoApi.Tests
             var service = new InMemoryTodoService();
             var todo = service.Add("Test");
             var todos = service.GetAll();
+            Assert.NotNull(todo);
             Assert.Contains(todos, t => t.Id == todo.Id && t.Text == "Test");
         }
 
@@ -33,12 +34,11 @@ namespace TodoApi.Tests
         {
             var service = new InMemoryTodoService();
             var todo = service.Add("Test");
+            Assert.NotNull(todo);
             var deleted = service.Delete(todo.Id);
             var todos = service.GetAll();
             Assert.True(deleted);
             Assert.DoesNotContain(todos, t => t.Id == todo.Id);
         }
-
-        // GetTodoById functionality is not present in InMemoryTodoService
     }
 }

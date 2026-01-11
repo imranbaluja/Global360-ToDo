@@ -40,5 +40,18 @@ namespace TodoApi.Tests
             Assert.True(deleted);
             Assert.DoesNotContain(todos, t => t.Id == todo.Id);
         }
+        [Fact]
+        public void Update_ShouldModifyItem()
+        {
+            var service = new InMemoryTodoService();
+            var todo = service.Add("Original");
+            Assert.NotNull(todo);
+            var updated = service.Update(todo.Id, "Updated");
+            Assert.NotNull(updated);
+            Assert.Equal(todo.Id, updated.Id);
+            Assert.Equal("Updated", updated.Text);
+            var todos = service.GetAll();
+            Assert.Contains(todos, t => t.Id == todo.Id && t.Text == "Updated");
+        }
     }
 }

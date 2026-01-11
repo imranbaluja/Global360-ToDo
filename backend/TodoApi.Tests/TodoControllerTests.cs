@@ -10,6 +10,30 @@ namespace TodoApi.Tests
 
     public class TodoControllerTests
     {
+
+        [Fact]
+        public void Put_NonExistingItem_ReturnsNotFound()
+        {
+            var svc = new InMemoryTodoService();
+            var controller = new TodosController(svc);
+            var updateDto = new UpdateTodoDto { Id = 999, Text = "updated" };
+            // Manually trigger model validation
+            var validationContext = new System.ComponentModel.DataAnnotations.ValidationContext(updateDto);
+            var validationResults = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
+            System.ComponentModel.DataAnnotations.Validator.TryValidateObject(updateDto, validationContext, validationResults, true);
+            foreach (var validationResult in validationResults)
+            {
+                controller.ModelState.AddModelError("Text", validationResult.ErrorMessage ?? "Validation error");
+            }
+            var putResult = controller.Put(updateDto);
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(putResult.Result);
+            var errorObj = notFoundResult.Value;
+            Assert.NotNull(errorObj);
+            var messageProp = errorObj.GetType().GetProperty("message");
+            var message = messageProp?.GetValue(errorObj)?.ToString();
+            Assert.Equal("Todo with id 999 not found.", message);
+        }
+
         [Fact]
         public void Post_NonAlphanumericText_ReturnsBadRequest()
         {
@@ -131,5 +155,30 @@ namespace TodoApi.Tests
             Assert.Contains(items, i => i.Text == "item 1");
             Assert.Contains(items, i => i.Text == "item 2");
         }
+        [Fact]
+        public void Put_ExistingItem_UpdatesText()
+        {
+            var svc = new InMemoryTodoService();
+            var controller = new TodosController(svc);
+            var createDto = new CreateTodoDto { Text = "original" };
+            var postResult = controller.Post(createDto);
+            var created = Assert.IsType<CreatedAtActionResult>(postResult.Result).Value as TodoItem;
+            Assert.NotNull(created);
+
+            var updateDto = new UpdateTodoDto { Id = created.Id, Text = "updated" };
+            // Manually trigger model validation
+            var validationContext = new System.ComponentModel.DataAnnotations.ValidationContext(updateDto);
+            var validationResults = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
+            System.ComponentModel.DataAnnotations.Validator.TryValidateObject(updateDto, validationContext, validationResults, true);
+            foreach (var validationResult in validationResults)
+            {
+                controller.ModelState.AddModelError("Text", validationResult.ErrorMessage ?? "Validation error");
+            }
+            var putResult = controller.Put(updateDto);
+            var okResult = Assert.IsType<OkObjectResult>(putResult.Result);
+            var updatedItem = Assert.IsType<TodoItem>(okResult.Value);
+            Assert.Equal("updated", updatedItem.Text);
+        }
+
     }
 }

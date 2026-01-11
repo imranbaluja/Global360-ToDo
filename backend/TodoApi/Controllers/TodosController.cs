@@ -36,5 +36,18 @@ namespace TodoApi.Controllers
             var removed = _svc.Delete(id);
             return removed ? NoContent() : NotFound();
         }
+
+        [HttpPut]
+        public ActionResult<TodoItem> Put([FromBody] UpdateTodoDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { message = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage });
+
+            var updated = _svc.Update(dto.Id, dto.Text.Trim());
+            if (updated == null)
+                return NotFound(new { message = $"Todo with id {dto.Id} not found." });
+
+            return Ok(updated);
+        }
     }
 }

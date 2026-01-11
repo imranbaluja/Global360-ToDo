@@ -4,6 +4,7 @@ using TodoApi.Models;
 namespace TodoApi.Services
 {
     public class InMemoryTodoService
+
     {
         private readonly ConcurrentDictionary<int, TodoItem> _store = new();
         private int _nextId = 0;
@@ -23,5 +24,12 @@ namespace TodoApi.Services
         }
 
         public bool Delete(int id) => _store.TryRemove(id, out _);
+        public TodoItem? Update(int id, string newText)
+        {
+            if (!_store.ContainsKey(id)) return null;
+            var updated = new TodoItem(id, newText);
+            _store[id] = updated;
+            return updated;
+        }
     }
 }

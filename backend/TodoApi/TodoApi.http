@@ -1,0 +1,26 @@
+@TodoApi_HostAddress = http://localhost:5186
+
+### Get all todos
+GET {{TodoApi_HostAddress}}/api/todos
+Accept: application/json
+
+### Create a new todo
+POST {{TodoApi_HostAddress}}/api/todos
+Content-Type: application/json
+
+{
+  "text": "Learn ASP.NET Core"
+}
+
+### Create another todo
+POST {{TodoApi_HostAddress}}/api/todos
+Content-Type: application/json
+
+{
+  "text": "Build a todo app"
+}
+
+### Delete a todo (replace {id} with actual ID from previous responses)
+DELETE {{TodoApi_HostAddress}}/api/todos/1
+
+###

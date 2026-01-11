@@ -1,0 +1,23 @@
+<div class="todo-container">
+  <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+  <!-- Input area -->
+  <div class="input-row">
+    <input
+      type="text"
+      placeholder="Add a new todo..."
+      [(ngModel)]="newTodo"
+      (keyup.enter)="addTodo()"
+    />
+
+    <button (click)="addTodo()" [disabled]="!newTodo.trim()">Add</button>
+  </div>
+
+  <!-- Todo List -->
+  <ul class="todo-list">
+    <li *ngFor="let item of todos; let i = index" class="todo-item">
+      <span>{{ item.text }}</span>
+
+      <button class="delete-btn" (click)="deleteTodo(i)">Delete</button>
+    </li>
+  </ul>
+</div>
